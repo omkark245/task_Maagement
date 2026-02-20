@@ -87,6 +87,23 @@ exports.updateStatus = (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
+    if (status === "done") {
+      db.query(
+        "SELECT title FROM tasks WHERE id = ?",
+        [taskId],
+        (err, taskResults) => {
+          if (!err && taskResults.length > 0) {
+            const taskTitle = taskResults[0].title;
+            const notificationMsg = `Task "${taskTitle}" has been completed by ${req.user.name || 'a user'}.`;
+            db.query(
+              "INSERT INTO notifications (message) VALUES (?)",
+              [notificationMsg]
+            );
+          }
+        }
+      );
+    }
+
     res.json({ message: "Task Status Updated Successfully" });
   });
 };

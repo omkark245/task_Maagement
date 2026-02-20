@@ -4,7 +4,9 @@ const {
   getAllTasks,
   assignTask,
   deleteTaskAdmin,
-  updateTaskAdmin
+  updateTaskAdmin,
+  getNotifications,
+  markNotificationRead
 } = require("../controllers/adminController");
 
 const { verifyToken } = require("../middleware/authMiddleware");
