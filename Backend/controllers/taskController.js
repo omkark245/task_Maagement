@@ -62,10 +62,25 @@ exports.updateStatus = (req, res) => {
   const taskId = req.params.id;
   const { status } = req.body;
 
-  const sql =
-    "UPDATE tasks SET status=? WHERE id=? AND assigned_to=?";
+  let task_image = req.files && req.files.task_image ? req.files.task_image[0].filename : null;
+  let task_file = req.files && req.files.task_file ? req.files.task_file[0].filename : null;
 
-  db.query(sql, [status, taskId, req.user.id], (err, result) => {
+  let sql = "UPDATE tasks SET status=?";
+  let params = [status];
+
+  if (task_image) {
+    sql += ", task_image=?";
+    params.push(task_image);
+  }
+  if (task_file) {
+    sql += ", task_file=?";
+    params.push(task_file);
+  }
+
+  sql += " WHERE id=? AND assigned_to=?";
+  params.push(taskId, req.user.id);
+
+  db.query(sql, params, (err, result) => {
     if (err) return res.status(500).json(err);
 
     if (result.affectedRows === 0) {
@@ -75,4 +90,3 @@ exports.updateStatus = (req, res) => {
     res.json({ message: "Task Status Updated Successfully" });
   });
 };
-

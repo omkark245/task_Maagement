@@ -1,0 +1,34 @@
+require("dotenv").config();
+const db = require("./db");
+
+const migrate = async () => {
+  const queries = [
+    "ALTER TABLE tasks ADD COLUMN task_image VARCHAR(255) DEFAULT NULL",
+    "ALTER TABLE tasks ADD COLUMN task_file VARCHAR(255) DEFAULT NULL"
+  ];
+
+  for (const query of queries) {
+    try {
+      await new Promise((resolve, reject) => {
+        db.query(query, (err, result) => {
+          if (err) {
+            if (err.code === 'ER_DUP_COLUMN_NAME') {
+              console.log("Column already exists, skipping...");
+              resolve();
+            } else {
+              reject(err);
+            }
+          } else {
+            console.log("Query executed successfully:", query);
+            resolve();
+          }
+        });
+      });
+    } catch (err) {
+      console.error("Migration failed:", err.message);
+    }
+  }
+  db.end();
+};
+
+migrate();

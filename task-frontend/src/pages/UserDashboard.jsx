@@ -63,8 +63,15 @@ const UserDashboard = () => {
     fetchTasks();
   };
 
-  const handleStatusChange = async (id, status) => {
-    await API.put(`/tasks/status/${id}`, { status });
+  const handleStatusChange = async (id, status, image, file) => {
+    const formData = new FormData();
+    formData.append("status", status);
+    if (image) formData.append("task_image", image);
+    if (file) formData.append("task_file", file);
+
+    await API.put(`/tasks/status/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     fetchTasks();
   };
 

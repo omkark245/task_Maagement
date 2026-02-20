@@ -56,6 +56,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteTask = async (id) => {
+    // This is no longer accessible via UI but kept for reference
     await API.delete(`/admin/task/${id}`);
     fetchTasks();
   };
@@ -155,6 +156,7 @@ const AdminDashboard = () => {
                       <th>Title</th>
                       <th>Status</th>
                       <th>Assigned</th>
+                      <th>Proof</th>
                       <th>Action</th>
                     </tr>
                   </thead>
@@ -169,19 +171,36 @@ const AdminDashboard = () => {
                         </td>
                         <td>{task.assigned_user || "Not Assigned"}</td>
                         <td>
+                          {task.task_image && (
+                            <a
+                              href={`http://localhost:5000/uploads/${task.task_image}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-sm btn-outline-info me-1"
+                            >
+                              Image
+                            </a>
+                          )}
+                          {task.task_file && (
+                            <a
+                              href={`http://localhost:5000/uploads/${task.task_file}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-sm btn-outline-secondary"
+                            >
+                              File
+                            </a>
+                          )}
+                          {!task.task_image && !task.task_file && "-"}
+                        </td>
+                        <td>
                           <button
                             className="btn btn-sm btn-primary me-2"
                             onClick={() => navigate(`/admin/edit-task/${task.id}`)}
                           >
                             Edit
                           </button>
-
-                          <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() => handleDeleteTask(task.id)}
-                          >
-                            Delete
-                          </button>
+                          {/* Delete button removed */}
                         </td>
                       </tr>
                     ))}

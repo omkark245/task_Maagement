@@ -10,6 +10,8 @@ const AdminEditTask = () => {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("pending");
   const [assignedTo, setAssignedTo] = useState("");
+  const [taskImage, setTaskImage] = useState(null);
+  const [taskFile, setTaskFile] = useState(null);
 
   const [users, setUsers] = useState([]);
 
@@ -27,6 +29,8 @@ const AdminEditTask = () => {
       setDescription(task.description);
       setStatus(task.status);
       setAssignedTo(task.assigned_to);
+      setTaskImage(task.task_image);
+      setTaskFile(task.task_file);
     }
   };
 
@@ -89,6 +93,32 @@ const AdminEditTask = () => {
               <option value="done">Done</option>
             </select>
           </div>
+
+          {taskImage && (
+            <div className="mb-3">
+              <label className="fw-semibold d-block">Uploaded Image</label>
+              <img
+                src={`http://localhost:5000/uploads/${taskImage}`}
+                alt="Task"
+                className="img-thumbnail"
+                style={{ maxHeight: "200px" }}
+              />
+            </div>
+          )}
+
+          {taskFile && (
+            <div className="mb-3">
+              <label className="fw-semibold d-block">Uploaded File</label>
+              <a
+                href={`http://localhost:5000/uploads/${taskFile}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline-secondary"
+              >
+                View File
+              </a>
+            </div>
+          )}
 
           <div className="mb-3">
             <label className="fw-semibold">Assign To</label>

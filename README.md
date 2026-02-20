@@ -45,6 +45,10 @@ Step 2: Create Database in XAMPP
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- To update for file uploads:
+ALTER TABLE tasks ADD COLUMN task_image VARCHAR(255) DEFAULT NULL;
+ALTER TABLE tasks ADD COLUMN task_file VARCHAR(255) DEFAULT NULL;
+
 Step 3: React Frontend Folder Structure
 npm create vite@latest task-frontend
 •	React
