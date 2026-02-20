@@ -5,7 +5,8 @@ const migrate = async () => {
   const queries = [
     "ALTER TABLE tasks ADD COLUMN task_image VARCHAR(255) DEFAULT NULL",
     "ALTER TABLE tasks ADD COLUMN task_file VARCHAR(255) DEFAULT NULL",
-    "CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, message TEXT NOT NULL, is_read BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+    "CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT DEFAULT NULL, message TEXT NOT NULL, is_read BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)",
+    "ALTER TABLE notifications ADD COLUMN user_id INT DEFAULT NULL"
   ];
 
   for (const query of queries) {

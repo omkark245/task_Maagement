@@ -4,7 +4,9 @@ const {
   getTasks,
   updateTask,
   deleteTask,
-  updateStatus
+  updateStatus,
+  getUserNotifications,
+  markUserNotificationRead
 } = require("../controllers/taskController");
 
 const { verifyToken } = require("../middleware/authMiddleware");
@@ -41,5 +43,8 @@ router.get("/", verifyToken, getTasks);
 router.put("/update/:id", verifyToken, updateTask);
 router.delete("/delete/:id", verifyToken, deleteTask);
 router.put("/status/:id", verifyToken, upload.fields([{ name: 'task_image', maxCount: 1 }, { name: 'task_file', maxCount: 1 }]), updateStatus);
+
+router.get("/notifications", verifyToken, getUserNotifications);
+router.put("/notifications/:id/read", verifyToken, markUserNotificationRead);
 
 module.exports = router;

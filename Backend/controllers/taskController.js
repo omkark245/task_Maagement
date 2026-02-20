@@ -107,3 +107,24 @@ exports.updateStatus = (req, res) => {
     res.json({ message: "Task Status Updated Successfully" });
   });
 };
+
+exports.getUserNotifications = (req, res) => {
+  const sql = "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC";
+
+  db.query(sql, [req.user.id], (err, notifications) => {
+    if (err) return res.status(500).json(err);
+
+    res.json(notifications);
+  });
+};
+
+exports.markUserNotificationRead = (req, res) => {
+  const { id } = req.params;
+  const sql = "UPDATE notifications SET is_read = TRUE WHERE id = ? AND user_id = ?";
+
+  db.query(sql, [id, req.user.id], (err, result) => {
+    if (err) return res.status(500).json(err);
+
+    res.json({ message: "Notification marked as read" });
+  });
+};
