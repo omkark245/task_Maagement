@@ -8,6 +8,8 @@ import EditTaskModal from "../components/EditTaskModal";
 const UserDashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [tasks, setTasks] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -26,8 +28,14 @@ const UserDashboard = () => {
     setTasks(res.data);
   };
 
+  const fetchNotifications = async () => {
+    const res = await API.get("/tasks/notifications");
+    setNotifications(res.data);
+  };
+
   useEffect(() => {
     fetchTasks();
+    fetchNotifications();
   }, []);
 
   const handleAddTask = async (e) => {
@@ -63,8 +71,15 @@ const UserDashboard = () => {
     fetchTasks();
   };
 
-  const handleStatusChange = async (id, status) => {
-    await API.put(`/tasks/status/${id}`, { status });
+  const handleStatusChange = async (id, status, image, file) => {
+    const formData = new FormData();
+    formData.append("status", status);
+    if (image) formData.append("task_image", image);
+    if (file) formData.append("task_file", file);
+
+    await API.put(`/tasks/status/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     fetchTasks();
   };
 
@@ -80,6 +95,13 @@ const UserDashboard = () => {
 
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
 
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  const handleMarkAsRead = async (id) => {
+    await API.put(`/tasks/notifications/${id}/read`);
+    fetchNotifications();
+  };
+
   return (
     <div className="d-flex">
       <Sidebar user={user} />
@@ -88,6 +110,43 @@ const UserDashboard = () => {
         <Navbar title="User Dashboard" />
 
         <div className="container mt-4">
+          {/* Notifications Section */}
+          <div className="d-flex justify-content-end mb-3">
+            <button
+              className="btn btn-outline-primary position-relative"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
+              Notifications
+              {unreadCount > 0 && (
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {showNotifications && (
+            <div className="card mb-4 shadow-sm border-0">
+              <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h6 className="mb-0">Notifications</h6>
+                <button className="btn btn-sm btn-light" onClick={() => setShowNotifications(false)}>Close</button>
+              </div>
+              <ul className="list-group list-group-flush" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                {notifications.length === 0 ? (
+                  <li className="list-group-item text-muted">No notifications</li>
+                ) : (
+                  notifications.map((n) => (
+                    <li key={n.id} className={`list-group-item d-flex justify-content-between align-items-center ${!n.is_read ? 'bg-light font-weight-bold' : ''}`}>
+                      <span className={!n.is_read ? 'fw-bold' : ''}>{n.message}</span>
+                      {!n.is_read && (
+                        <button className="btn btn-sm btn-link" onClick={() => handleMarkAsRead(n.id)}>Mark Read</button>
+                      )}
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          )}
           <div className="row">
             {/* Add Task */}
             <div className="col-md-4">

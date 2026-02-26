@@ -1,0 +1,3 @@
+Backend/uploads/
+*.log
+node_modules/

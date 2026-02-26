@@ -11,6 +11,8 @@ const AdminDashboard = () => {
 
   const [users, setUsers] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -32,9 +34,15 @@ const AdminDashboard = () => {
     setTasks(res.data);
   };
 
+  const fetchNotifications = async () => {
+    const res = await API.get("/admin/notifications");
+    setNotifications(res.data);
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchTasks();
+    fetchNotifications();
   }, []);
 
   const handleAssignTask = async (e) => {
@@ -56,6 +64,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteTask = async (id) => {
+    // This is no longer accessible via UI but kept for reference
     await API.delete(`/admin/task/${id}`);
     fetchTasks();
   };
@@ -72,6 +81,13 @@ const AdminDashboard = () => {
 
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
 
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  const handleMarkAsRead = async (id) => {
+    await API.put(`/admin/notifications/${id}/read`);
+    fetchNotifications();
+  };
+
   return (
     <div className="d-flex">
       <Sidebar user={user} />
@@ -80,6 +96,43 @@ const AdminDashboard = () => {
         <Navbar title="Admin Dashboard" />
 
         <div className="container mt-4">
+          {/* Notifications Section */}
+          <div className="d-flex justify-content-end mb-3">
+            <button
+              className="btn btn-outline-primary position-relative"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
+              Notifications
+              {unreadCount > 0 && (
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {showNotifications && (
+            <div className="card mb-4 shadow-sm border-0">
+              <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h6 className="mb-0">Notifications</h6>
+                <button className="btn btn-sm btn-light" onClick={() => setShowNotifications(false)}>Close</button>
+              </div>
+              <ul className="list-group list-group-flush" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                {notifications.length === 0 ? (
+                  <li className="list-group-item text-muted">No notifications</li>
+                ) : (
+                  notifications.map((n) => (
+                    <li key={n.id} className={`list-group-item d-flex justify-content-between align-items-center ${!n.is_read ? 'bg-light font-weight-bold' : ''}`}>
+                      <span className={!n.is_read ? 'fw-bold' : ''}>{n.message}</span>
+                      {!n.is_read && (
+                        <button className="btn btn-sm btn-link" onClick={() => handleMarkAsRead(n.id)}>Mark Read</button>
+                      )}
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          )}
           <div className="row">
             {/* Assign Task */}
             <div className="col-md-4">
@@ -155,6 +208,7 @@ const AdminDashboard = () => {
                       <th>Title</th>
                       <th>Status</th>
                       <th>Assigned</th>
+                      <th>Proof</th>
                       <th>Action</th>
                     </tr>
                   </thead>
@@ -169,19 +223,36 @@ const AdminDashboard = () => {
                         </td>
                         <td>{task.assigned_user || "Not Assigned"}</td>
                         <td>
+                          {task.task_image && (
+                            <a
+                              href={`http://localhost:5000/uploads/${task.task_image}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-sm btn-outline-info me-1"
+                            >
+                              Image
+                            </a>
+                          )}
+                          {task.task_file && (
+                            <a
+                              href={`http://localhost:5000/uploads/${task.task_file}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-sm btn-outline-secondary"
+                            >
+                              File
+                            </a>
+                          )}
+                          {!task.task_image && !task.task_file && "-"}
+                        </td>
+                        <td>
                           <button
                             className="btn btn-sm btn-primary me-2"
                             onClick={() => navigate(`/admin/edit-task/${task.id}`)}
                           >
-                            Edit
+                            Edit / Reassign
                           </button>
-
-                          <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() => handleDeleteTask(task.id)}
-                          >
-                            Delete
-                          </button>
+                          {/* Delete button removed */}
                         </td>
                       </tr>
                     ))}

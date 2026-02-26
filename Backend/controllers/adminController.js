@@ -36,6 +36,13 @@ exports.assignTask = (req, res) => {
   db.query(sql, [title, description, assigned_to, req.user.id], (err, result) => {
     if (err) return res.status(500).json(err);
 
+    // Send notification to the assigned user
+    const notificationMsg = `You have been assigned a new task: "${title}".`;
+    db.query(
+      "INSERT INTO notifications (user_id, message) VALUES (?, ?)",
+      [assigned_to, notificationMsg]
+    );
+
     res.json({ message: "Task Assigned Successfully" });
   });
 };
@@ -71,5 +78,26 @@ exports.updateTaskAdmin = (req, res) => {
     }
 
     res.json({ message: "Task Updated Successfully (Admin)" });
+  });
+};
+
+exports.getNotifications = (req, res) => {
+  const sql = "SELECT * FROM notifications WHERE user_id IS NULL ORDER BY created_at DESC";
+
+  db.query(sql, (err, notifications) => {
+    if (err) return res.status(500).json(err);
+
+    res.json(notifications);
+  });
+};
+
+exports.markNotificationRead = (req, res) => {
+  const { id } = req.params;
+  const sql = "UPDATE notifications SET is_read = TRUE WHERE id = ?";
+
+  db.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json(err);
+
+    res.json({ message: "Notification marked as read" });
   });
 };

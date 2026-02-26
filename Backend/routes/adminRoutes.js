@@ -4,7 +4,9 @@ const {
   getAllTasks,
   assignTask,
   deleteTaskAdmin,
-  updateTaskAdmin
+  updateTaskAdmin,
+  getNotifications,
+  markNotificationRead
 } = require("../controllers/adminController");
 
 const { verifyToken } = require("../middleware/authMiddleware");
@@ -17,7 +19,7 @@ router.get("/tasks", verifyToken, isAdmin, getAllTasks);
 
 router.post("/assign", verifyToken, isAdmin, assignTask);
 
-router.delete("/task/:id", verifyToken, isAdmin, deleteTaskAdmin);
+// deleteTaskAdmin is kept in controller but route is removed to prevent admin from deleting tasks
 router.put("/task/:id", verifyToken, isAdmin, updateTaskAdmin);
 
 module.exports = router;
